@@ -1,0 +1,77 @@
+############################
+# OS
+############################
+.DS_Store
+Thumbs.db
+
+############################
+# IntelliJ / JetBrains
+############################
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+############################
+# Java / Gradle
+############################
+*.class
+*.log
+
+.gradle/
+build/
+target/
+
+############################
+# Maven
+############################
+/target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+
+############################
+# Environment variables
+############################
+.env
+.env.*
+!.env.example
+
+############################
+# Docker
+############################
+docker-compose.override.yml
+*.env.docker
+
+############################
+# Logs
+############################
+logs/
+*.log
+
+############################
+# Test / Coverage
+############################
+coverage/
+*.lcov
+
+############################
+# IDE / Tooling
+############################
+.sonar/
+.cache/
+tmp/
+
+############################
+# 기타
+############################
+*.swp
+*.swo
+*.bak
+
+/infra
+/.env
