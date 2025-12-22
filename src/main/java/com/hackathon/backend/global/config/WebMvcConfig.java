@@ -1,4 +1,4 @@
-package com.hackathon.backend.config;
+package com.hackathon.backend.global.config;
 
 import com.hackathon.backend.global.security.annotation.CurrentMemberArgumentResolver;
 import lombok.RequiredArgsConstructor;

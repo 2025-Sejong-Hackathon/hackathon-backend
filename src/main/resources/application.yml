@@ -23,8 +23,8 @@ springdoc:
 
 jwt:
     secret: ${JWT_SECRET}
-    access-token-expiration: ${JWT_ACCESS_EXPIRATION}      # 1시간 (milliseconds)
-    refresh-token-expiration: ${JWT_REFRESH_EXPIRATION}   # 7일 (milliseconds)
+    access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION}      # 1시간 (milliseconds)
+    refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION}   # 7일 (milliseconds)
 
 logging:
     level:

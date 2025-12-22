@@ -1,4 +1,4 @@
-package com.hackathon.backend.config;
+package com.hackathon.backend.global.config;
 
 import com.hackathon.backend.global.security.JwtAccessDeniedHandler;
 import com.hackathon.backend.global.security.JwtAuthenticationEntryPoint;

@@ -1,6 +1,6 @@
 package com.hackathon.backend.global.jwt;
 
-import com.hackathon.backend.config.JwtProperties;
+import com.hackathon.backend.global.config.JwtProperties;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;

@@ -1,4 +1,4 @@
-package com.hackathon.backend.config;
+package com.hackathon.backend.global.config;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,4 +1,4 @@
-package com.hackathon.backend.config;
+package com.hackathon.backend.global.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -43,8 +43,8 @@ public class SwaggerConfig {
                                 .name("Christmas Team")
                                 .email("support@christmas.com")))
                 .servers(List.of(
-                        new Server().url("http://localhost:8080").description("로컬 개발 서버"),
-                        new Server().url("https://api.christmas.com").description("프로덕션 서버")
+                        new Server().url("http://localhost:8082").description("로컬 개발 서버"),
+                        new Server().url("https://43.203.41.246").description("프로덕션 서버")
                 ))
                 .components(new Components()
                         .addSecuritySchemes("Bearer Authentication", securityScheme));
