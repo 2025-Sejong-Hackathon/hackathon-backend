@@ -3,7 +3,6 @@ FROM gradle:8.5-jdk21 AS builder
 WORKDIR /app
 # Gradle 캐시를 위한 의존성 파일 복사
 COPY build.gradle settings.gradle ./
-COPY gradle ./gradle
 # 의존성 다운로드 (캐시 활용)
 RUN gradle dependencies --no-daemon || true
 # 소스 코드 복사
