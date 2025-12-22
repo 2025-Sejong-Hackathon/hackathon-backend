@@ -93,6 +93,9 @@ jobs:
               echo "Warning: .env file not found. Please create it with required environment variables."
             fi
             
+            # logs, files 디렉토리 생성
+            mkdir -p logs files
+            
             # 기존 컨테이너 중지 및 제거
             docker stop hackathon-backend || true
             docker rm hackathon-backend || true
@@ -102,9 +105,9 @@ jobs:
             sleep 10
             docker ps | grep hackathon-backend || echo "Container not running!"
             
-            # 헬스체크
+            # 헬스체크 (외부 포트 8082 사용)
             for i in {1..30}; do
-              if docker exec hackathon-backend wget --spider -q http://localhost:8082/actuator/health 2>/dev/null; then
+              if curl -f -s http://localhost:8082/actuator/health > /dev/null; then
                 echo "Health check passed!"
                 exit 0
               fi
