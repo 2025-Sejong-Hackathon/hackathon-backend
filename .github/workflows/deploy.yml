@@ -84,8 +84,8 @@ jobs:
               | docker login --username AWS --password-stdin ${ECR_REGISTRY}
             
             # 배포 디렉토리로 이동 (없으면 생성)
-            mkdir -p /home/ubuntu/apps/christmas/prod
-            cd /home/ubuntu/apps/christmas/prod
+            mkdir -p /home/ubuntu/apps/hackathon/prod
+            cd /home/ubuntu/apps/hackathon/prod
             
             # .env 파일이 없으면 경고
             if [ ! -f .env ]; then
@@ -93,17 +93,17 @@ jobs:
             fi
             
             # 기존 컨테이너 중지 및 제거
-            docker stop christmas-backend || true
-            docker rm christmas-backend || true
+            docker stop hackathon-backend || true
+            docker rm hackathon-backend || true
             docker pull ${ECR_REGISTRY}/${ECR_REPO}:latest
-            docker compose up -d christmas-backend
+            docker compose up -d hackathon-backend
             docker image prune -f
             sleep 10
-            docker ps | grep christmas-backend || echo "Container not running!"
+            docker ps | grep hackathon-backend || echo "Container not running!"
             
             # 헬스체크
             for i in {1..30}; do
-              if docker exec christmas-backend wget --spider -q http://localhost:8080/actuator/health 2>/dev/null; then
+              if docker exec hackathon-backend wget --spider -q http://localhost:8082/actuator/health 2>/dev/null; then
                 echo "Health check passed!"
                 exit 0
               fi
@@ -112,6 +112,6 @@ jobs:
             done
             
             echo "Health check failed!"
-            docker logs christmas-backend --tail 50
+            docker logs hackathon-backend --tail 50
             exit 1
 
