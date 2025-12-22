@@ -28,12 +28,11 @@ USER spring:spring
 # 빌드된 JAR 파일 복사
 COPY --from=builder /app/build/libs/*.jar app.jar
 
-
 # JVM 옵션 설정
 ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
 
 # 포트 노출
-EXPOSE 8080
+EXPOSE 8082
 
 # 애플리케이션 실행
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]

@@ -35,3 +35,8 @@ decorator:
     datasource:
         p6spy:
             enable-logging: true
+
+server:
+    port: 8082
+    servlet:
+        context-path: /hack
