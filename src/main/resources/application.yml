@@ -38,5 +38,3 @@ decorator:
 
 server:
     port: 8082
-    servlet:
-        context-path: /hack
