@@ -102,4 +102,22 @@ jobs:
             docker pull ${ECR_REGISTRY}/${ECR_REPO}:latest
             docker compose up -d hackathon-backend
             docker image prune -f
+            
+            # 컨테이너 시작 대기
+            echo "Waiting for container to start..."
+            sleep 10
+            
+            # 헬스체크 (최대 20초)
+            for i in {1..10}; do
+              if curl -f -s http://localhost:8082/actuator/health > /dev/null 2>&1; then
+                echo "✅ Health check passed!"
+                exit 0
+              fi
+              sleep 2
+            done
+            
+            # 헬스체크 실패 시 로그 출력
+            echo "❌ Health check failed!"
+            docker logs hackathon-backend --tail 30
+            exit 1
 
