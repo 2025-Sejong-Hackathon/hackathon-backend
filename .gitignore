@@ -65,3 +65,4 @@ application-secret.yml
 application-local.yml
 
 docs/
+infra/
