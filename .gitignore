@@ -1,77 +1,67 @@
-############################
-# OS
-############################
-.DS_Store
-Thumbs.db
-
-############################
-# IntelliJ / JetBrains
-############################
-.idea/
-*.iml
-*.iws
-*.ipr
-out/
-
-############################
-# Java / Gradle
-############################
-*.class
-*.log
-
+# Gradle
 .gradle/
 build/
-target/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-############################
-# Maven
-############################
-/target/
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.versionsBackup
-pom.xml.next
-release.properties
-dependency-reduced-pom.xml
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
 
-############################
-# Environment variables
-############################
+# Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# VS Code
+.vscode/
+
+# Mac
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# 환경 변수
 .env
-.env.*
-!.env.example
+.env.local
+.env.*.local
 
-############################
-# Docker
-############################
-docker-compose.override.yml
-*.env.docker
-
-############################
-# Logs
-############################
-logs/
+# 로그
 *.log
+logs/
 
-############################
-# Test / Coverage
-############################
-coverage/
-*.lcov
-
-############################
-# IDE / Tooling
-############################
-.sonar/
-.cache/
-tmp/
-
-############################
-# 기타
-############################
+# 임시 파일
+*.tmp
 *.swp
-*.swo
-*.bak
+*~
 
-/infra
-/.env
+# 데이터베이스
+*.db
+*.sqlite
+
+# 보안 파일
+application-secret.yml
+application-local.yml
+
+docs/

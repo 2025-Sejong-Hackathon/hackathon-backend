@@ -1,0 +1,117 @@
+name: Deploy Christmas Backend to EC2
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ap-northeast-2
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  ECR_REPO: christmas-backend
+  IMAGE_URI: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-northeast-2.amazonaws.com/christmas-backend
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: JDK 21 설치
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: gradlew 실행 권한 추가
+        run: chmod +x ./gradlew
+
+      - name: AWS Role 설정
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsECRDeployRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: ECR에 로그인
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Docker metadata 설정
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_URI }}
+          tags: |
+            type=raw,value=latest
+            type=sha
+
+      - name: Docker Buildx 설정
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+
+      - name: Docker 이미지 빌드 및 ECR에 Push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: EC2 접속 및 배포
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            set -e
+            
+            # 환경 변수 설정
+            AWS_REGION=ap-northeast-2
+            ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
+            ECR_REPO=christmas-backend
+            
+            # ECR 로그인
+            aws ecr get-login-password --region ${AWS_REGION} \
+              | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+            
+            # 배포 디렉토리로 이동 (없으면 생성)
+            mkdir -p /home/ubuntu/apps/christmas/prod
+            cd /home/ubuntu/apps/christmas/prod
+            
+            # .env 파일이 없으면 경고
+            if [ ! -f .env ]; then
+              echo "Warning: .env file not found. Please create it with required environment variables."
+            fi
+            
+            # 기존 컨테이너 중지 및 제거
+            docker stop christmas-backend || true
+            docker rm christmas-backend || true
+            docker pull ${ECR_REGISTRY}/${ECR_REPO}:latest
+            docker compose up -d christmas-backend
+            docker image prune -f
+            sleep 10
+            docker ps | grep christmas-backend || echo "Container not running!"
+            
+            # 헬스체크
+            for i in {1..30}; do
+              if docker exec christmas-backend wget --spider -q http://localhost:8080/actuator/health 2>/dev/null; then
+                echo "Health check passed!"
+                exit 0
+              fi
+              echo "Waiting for health check... ($i/30)"
+              sleep 2
+            done
+            
+            echo "Health check failed!"
+            docker logs christmas-backend --tail 50
+            exit 1
+

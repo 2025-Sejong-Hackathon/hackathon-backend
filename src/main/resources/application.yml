@@ -1,0 +1,37 @@
+spring:
+    profiles:
+        active: ${SPRING_PROFILES_ACTIVE:dev}
+        include: actuator
+    application:
+        name: christmas-backend
+
+    jpa:
+        open-in-view: false
+        properties:
+            hibernate:
+                default_batch_fetch_size: 100
+
+springdoc:
+    api-docs:
+        path: /api-docs
+    swagger-ui:
+        path: /swagger-ui.html
+        tags-sorter: alpha
+        operations-sorter: alpha
+    default-consumes-media-type: application/json
+    default-produces-media-type: application/json
+
+jwt:
+    secret: ${JWT_SECRET:christmas-backend-jwt-secret-key-2024-sejong-university-for-secure-hs512-algorithm-minimum-512-bits-required}
+    access-token-expiration: ${JWT_ACCESS_EXPIRATION:3600000}      # 1시간 (milliseconds)
+    refresh-token-expiration: ${JWT_REFRESH_EXPIRATION:604800000}   # 7일 (milliseconds)
+
+logging:
+    level:
+        christmas.christmas_backend: ${LOG_LEVEL:INFO}
+        org.springframework.security: ${LOG_LEVEL:INFO}
+
+decorator:
+    datasource:
+        p6spy:
+            enable-logging: true

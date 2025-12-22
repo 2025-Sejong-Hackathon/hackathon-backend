@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  christmas-backend:
+    image: ${ECR_REGISTRY}/${ECR_REPO}:latest
+    container_name: christmas-backend
+    restart: unless-stopped
+    ports:
+      - "8082:8080"
+    environment:
+      - ./.env
+    networks:
+      - christmas-network
+    volumes:
+      - ./logs:apps/logs
+      - ./files:apps/files
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  christmas-network:
+    driver: bridge
+

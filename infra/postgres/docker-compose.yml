@@ -1,0 +1,23 @@
+services:
+    postgres:
+        image: postgres:15
+        container_name: postgres-dev
+        restart: unless-stopped
+
+        ports:
+            - "${POSTGRES_PORT}:5432"
+
+        env_file:
+            - .env
+
+        volumes:
+            - postgres-dev-data:/var/lib/postgresql/data
+
+        networks:
+            - dev-network
+
+volumes:
+    postgres-dev-data:
+
+networks:
+    dev-network:

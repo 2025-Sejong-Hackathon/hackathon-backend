@@ -1,0 +1,53 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# GitHub
+.github
+
+# IDE
+.idea
+.vscode
+*.iml
+*.iws
+*.ipr
+
+# Gradle
+.gradle
+gradle
+gradlew
+gradlew.bat
+
+# Build
+build
+target
+out
+
+# Docs
+*.md
+README.md
+HELP.md
+docs/
+FIX_*.md
+
+# Tests
+src/test
+
+# Mac
+.DS_Store
+
+# 환경 파일
+.env
+.env.*
+!.env.example
+
+# 로그
+*.log
+logs
+
+# 임시 파일
+*.tmp
+*.swp
+*~
+
