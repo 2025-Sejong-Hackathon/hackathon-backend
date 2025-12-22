@@ -27,7 +27,7 @@ public class SwaggerConfig {
 
         return new OpenAPI()
                 .info(new Info()
-                        .title("Christmas Backend API")
+                        .title("2025 Sejong Hackathon Backend API")
                         .description("""
                                 Christmas 프로젝트 백엔드 API 문서
                                 
