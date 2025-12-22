@@ -44,7 +44,7 @@ public class SwaggerConfig {
                                 .email("support@christmas.com")))
                 .servers(List.of(
                         new Server().url("http://localhost:8082").description("로컬 개발 서버"),
-                        new Server().url("https://43.203.41.246").description("프로덕션 서버")
+                        new Server().url("https://43.203.41.246/hack").description("프로덕션 서버")
                 ))
                 .components(new Components()
                         .addSecuritySchemes("Bearer Authentication", securityScheme));
