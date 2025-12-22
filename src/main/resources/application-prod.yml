@@ -34,6 +34,6 @@ springdoc:
 
 logging:
   level:
-    christmas.christmas_backend: INFO
+    com.hackathon.backend: INFO
     org.springframework.security: WARN
     org.hibernate.SQL: WARN

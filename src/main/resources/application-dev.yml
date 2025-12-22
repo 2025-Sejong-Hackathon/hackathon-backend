@@ -32,7 +32,7 @@ springdoc:
 
 logging:
     level:
-        christmas.christmas_backend: DEBUG
+        com.hackathon.backend: DEBUG
         org.springframework.security: DEBUG
         org.hibernate.SQL: DEBUG
         org.hibernate.type.descriptor.sql.BasicBinder: TRACE
