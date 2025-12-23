@@ -1,12 +1,16 @@
 package com.hackathon.backend.domain.member.service;
 
+import com.hackathon.backend.domain.member.entity.Gender;
 import com.hackathon.backend.domain.member.entity.Member;
 import com.hackathon.backend.domain.member.repository.MemberRepository;
-import com.chuseok22.sejongportallogin.core.SejongMemberInfo;
+import com.hackathon.backend.global.exception.BusinessException;
+import com.hackathon.backend.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
 
 @Slf4j
 @Service
@@ -16,35 +20,64 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
-    @Transactional
-    public Member createOrUpdateMember(SejongMemberInfo sejongMemberInfo) {
-        String studentId = sejongMemberInfo.getStudentId();
+    public boolean isNewMember(String studentId) {
+        return memberRepository.findByStudentId(studentId).isEmpty();
+    }
 
-        return memberRepository.findByStudentId(studentId)
-                .map(existingMember -> {
-                    log.info("기존 회원 정보 업데이트: {}", studentId);
-                    existingMember.updateInfo(
-                            sejongMemberInfo.getName(),
-                            sejongMemberInfo.getMajor(),
-                            sejongMemberInfo.getGrade(),
-                            sejongMemberInfo.getCompletedSemester()
-                    );
-                    return existingMember;
-                })
+    public Member createOrUpdateMember(com.chuseok22.sejongportallogin.core.SejongMemberInfo sejongMemberInfo) {
+        return memberRepository.findByStudentId(sejongMemberInfo.getStudentId())
                 .orElseGet(() -> {
-                    log.info("신규 회원 생성: {}", studentId);
+                    // 신규 회원 생성
                     Member newMember = Member.builder()
-                            .studentId(studentId)
+                            .studentId(sejongMemberInfo.getStudentId())
                             .name(sejongMemberInfo.getName())
                             .major(sejongMemberInfo.getMajor())
                             .grade(sejongMemberInfo.getGrade())
-                            .completedSemesters(sejongMemberInfo.getCompletedSemester())
+                            .completedSemester(sejongMemberInfo.getCompletedSemester())
                             .build();
-                    return memberRepository.save(newMember);
+                    memberRepository.save(newMember);
+                    return newMember;
                 });
     }
 
-    public boolean isNewMember(String studentId) {
-        return !memberRepository.existsByStudentId(studentId);
+    /**
+     * 회원 온보딩 정보 업데이트
+     */
+    @Transactional
+    public Member updateOnboardingInfo(Long memberId, Gender gender, LocalDate birthDate,
+                                       Boolean isSmoker, Boolean isDrinker,
+                                       Boolean isColdSensitive, Boolean isHeatSensitive) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+
+        member.updateOnboardingInfo(gender, birthDate, isSmoker, isDrinker, isColdSensitive, isHeatSensitive);
+        return member;
+    }
+
+    /**
+     * 회원 전체 정보 업데이트
+     */
+    @Transactional
+    public Member updateMemberInfo(Long memberId, String major, String grade, String completedSemester,
+                                   Gender gender, LocalDate birthDate, Boolean isSmoker, Boolean isDrinker,
+                                   Boolean isColdSensitive, Boolean isHeatSensitive) {
+        log.info("회원 정보 업데이트: memberId={}", memberId);
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+
+        member.updateFullInfo(major, grade, completedSemester, gender, birthDate,
+                isSmoker, isDrinker, isColdSensitive, isHeatSensitive);
+
+        return member;
+    }
+
+    /**
+     * 회원 조회
+     */
+    public Member getMember(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
     }
 }
+

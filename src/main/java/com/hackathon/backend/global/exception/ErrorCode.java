@@ -32,6 +32,7 @@ public enum ErrorCode {
 
     // 👤 Member Domain Errors (USER-xxx)
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER-001", "사용자를 찾을 수 없습니다"),
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER-001", "회원을 찾을 수 없습니다"),
     USER_ALREADY_EXISTS(HttpStatus.CONFLICT, "USER-002", "이미 존재하는 사용자입니다"),
     INVALID_USERNAME_PASSWORD(HttpStatus.BAD_REQUEST, "USER-003", "잘못된 아이디 또는 비밀번호입니다"),
     USERNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "USER-004", "이미 사용 중인 아이디입니다"),
