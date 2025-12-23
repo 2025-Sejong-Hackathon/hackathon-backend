@@ -29,6 +29,11 @@ jwt:
     access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION}      # 1시간 (milliseconds)
     refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION}   # 7일 (milliseconds)
 
+# AI 추천 서버 설정
+ai:
+    server:
+        url: ${AI_SERVER_URL:http://43.203.41.246:8002}
+
 logging:
     level:
         christmas.christmas_backend: INFO
