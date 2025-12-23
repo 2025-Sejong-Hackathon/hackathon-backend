@@ -1,6 +1,7 @@
 package com.hackathon.backend.api.laundry.controller;
 
 import com.hackathon.backend.api.laundry.dto.CongestionForecastResponse;
+import com.hackathon.backend.api.laundry.dto.CongestionResponse;
 import com.hackathon.backend.api.laundry.dto.LaundryMachineResponse;
 import com.hackathon.backend.api.laundry.dto.LaundrySessionResponse;
 import com.hackathon.backend.api.laundry.dto.StartLaundryRequest;
@@ -135,18 +136,19 @@ public class LaundryController {
             description = """
                     AI 서버를 통해 특정 날짜의 세탁 혼잡도를 예측합니다.
                     
+                    - 오늘의 세탁 메시지도 함께 제공됩니다.
                     - AI 서버에서 시간대별 혼잡도 예측 (0-10)
                     - 피크 시간대와 추천 시간대 제공
                     - 예: 2025-12-25
                     """
     )
     @GetMapping("/congestion")
-    public ResponseEntity<ApiResponse<CongestionForecastResponse>> getCongestionForecast(
+    public ResponseEntity<ApiResponse<CongestionResponse>> getCongestionForecast(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam GenderZone genderZone) {
         log.info("혼잡도 예측 조회: date={}, zone={}", date, genderZone);
 
-        CongestionForecastResponse response = laundryService.getCongestionForecast(date, genderZone);
+        CongestionResponse response = laundryService.getCongestionForecast(date, genderZone);
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }

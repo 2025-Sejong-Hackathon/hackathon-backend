@@ -1,10 +1,9 @@
 package com.hackathon.backend.domain.laundry.service;
 
-import com.hackathon.backend.api.laundry.dto.CongestionForecastResponse;
-import com.hackathon.backend.api.laundry.dto.LaundryMachineResponse;
-import com.hackathon.backend.api.laundry.dto.LaundrySessionResponse;
+import com.hackathon.backend.api.laundry.dto.*;
 import com.hackathon.backend.domain.laundry.entity.*;
 import com.hackathon.backend.domain.laundry.repository.LaundryCongestionForecastRepository;
+import com.hackathon.backend.domain.laundry.repository.LaundryDailyMessageRepository;
 import com.hackathon.backend.domain.laundry.repository.LaundryMachineRepository;
 import com.hackathon.backend.domain.laundry.repository.LaundrySessionRepository;
 import com.hackathon.backend.domain.member.entity.Member;
@@ -33,6 +32,7 @@ public class LaundryService {
     private final LaundrySessionRepository sessionRepository;
     private final LaundryCongestionForecastRepository congestionRepository;
     private final MemberRepository memberRepository;
+    private final LaundryDailyMessageRepository dailyMessageRepository;
     private final RestTemplate restTemplate;
 
     @Value("${ai.server.url:http://43.203.41.246:8002}")
@@ -173,12 +173,101 @@ public class LaundryService {
     }
 
     /**
-     * AI 서버에서 혼잡도 예측 데이터 가져오기
+     * AI 서버에서 혼잡도 예측 데이터 가져오기 (세탁 메시지 포함)
      */
     @Transactional
-    public CongestionForecastResponse getCongestionForecast(LocalDate date, GenderZone genderZone) {
+    public CongestionResponse getCongestionForecast(LocalDate date, GenderZone genderZone) {
         log.info("혼잡도 예측 조회: date={}, zone={}", date, genderZone);
 
+        // 1. 오늘의 세탁 메시지 조회
+        LaundryMessage laundryMessage = getTodayLaundryMessage();
+
+        // 2. 혼잡도 예측 조회
+        CongestionForecastResponse forecast = getCongestionForecastData(date, genderZone);
+
+        // 3. 통합 응답 반환
+        return CongestionResponse.builder()
+                .laundryMessage(laundryMessage)
+                .congestionForecastResponse(forecast)
+                .build();
+    }
+
+    /**
+     * 오늘의 세탁 메시지 조회
+     */
+    @Transactional
+    public LaundryMessage getTodayLaundryMessage() {
+        LocalDate today = LocalDate.now();
+        log.info("오늘의 세탁 메시지 조회: date={}", today);
+
+        try {
+            // AI 서버에서 오늘의 메시지 조회
+            String url = aiServerUrl + "/laundry/today";
+            log.info("AI 서버 요청 (세탁 메시지): {}", url);
+
+            ResponseEntity<LaundryMessage> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            LaundryMessage messageData = response.getBody();
+
+            if (messageData != null && messageData.getLaundryMessage() != null) {
+                log.info("AI 서버 응답 성공 (세탁 메시지): {}", messageData.getLaundryMessage());
+                // DB에 저장
+                saveLaundryMessage(today, messageData.getLaundryMessage());
+                return messageData;
+            }
+
+        } catch (Exception e) {
+            log.error("AI 서버 호출 실패 (세탁 메시지): error={}", e.getMessage());
+        }
+
+        // Fallback: DB에서 조회
+        LaundryDailyMessage savedMessage = dailyMessageRepository.findByMessageDate(today).orElse(null);
+        if (savedMessage != null) {
+            log.info("DB에서 세탁 메시지 조회 성공: {}", savedMessage.getMessage());
+            return LaundryMessage.builder()
+                    .laundryMessage(savedMessage.getMessage())
+                    .build();
+        }
+
+        // 기본 메시지 반환
+        log.warn("세탁 메시지를 찾을 수 없어 기본 메시지 반환");
+        return LaundryMessage.builder()
+                .laundryMessage("오늘도 좋은 하루 되세요! ☀️")
+                .build();
+    }
+
+    /**
+     * 세탁 메시지 DB에 저장
+     */
+    @Transactional
+    public void saveLaundryMessage(LocalDate date, String message) {
+        LaundryDailyMessage dailyMessage = dailyMessageRepository.findByMessageDate(date)
+                .orElse(null);
+
+        if (dailyMessage != null) {
+            // 이미 있으면 업데이트
+            dailyMessage.updateMessage(message);
+            log.info("세탁 메시지 업데이트: date={}", date);
+        } else {
+            // 없으면 새로 생성
+            dailyMessage = LaundryDailyMessage.builder()
+                    .messageDate(date)
+                    .message(message)
+                    .build();
+            dailyMessageRepository.save(dailyMessage);
+            log.info("세탁 메시지 저장: date={}", date);
+        }
+    }
+
+    /**
+     * 혼잡도 예측 데이터 조회 (내부용)
+     */
+    private CongestionForecastResponse getCongestionForecastData(LocalDate date, GenderZone genderZone) {
         try {
             // AI 서버 호출 (GET 요청으로 변경)
             String url = aiServerUrl + "/predict?date=" + date.toString();
