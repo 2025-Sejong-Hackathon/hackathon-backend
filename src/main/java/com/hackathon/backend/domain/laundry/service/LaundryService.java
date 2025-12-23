@@ -182,27 +182,22 @@ public class LaundryService {
         log.info("혼잡도 예측 조회: date={}, zone={}", date, genderZone);
 
         try {
-            // AI 서버 호출
-            String url = aiServerUrl + "/predict";
+            // AI 서버 호출 (GET 요청으로 변경)
+            String url = aiServerUrl + "/predict?date=" + date.toString();
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("date", date.toString());
-
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+            log.info("AI 서버 요청: {}", url);
 
             ResponseEntity<CongestionForecastResponse> response = restTemplate.exchange(
                     url,
-                    HttpMethod.POST,
-                    entity,
+                    HttpMethod.GET,
+                    null,
                     new ParameterizedTypeReference<>() {}
             );
 
             CongestionForecastResponse forecastData = response.getBody();
 
             if (forecastData != null) {
+                log.info("AI 서버 응답 성공: date={}", date);
                 // DB에 저장
                 saveCongestionForecast(date, genderZone, forecastData);
             }
@@ -210,13 +205,14 @@ public class LaundryService {
             return forecastData;
 
         } catch (Exception e) {
-            log.error("AI 서버 호출 실패", e);
+            log.error("AI 서버 호출 실패: date={}, error={}", date, e.getMessage());
 
             // DB에서 조회 (fallback)
             List<LaundryCongestionForecast> savedForecasts = congestionRepository
                     .findByForecastDateAndGenderZoneOrderByHourAsc(date, genderZone);
 
             if (!savedForecasts.isEmpty()) {
+                log.info("DB에서 혼잡도 데이터 조회 성공: date={}, count={}", date, savedForecasts.size());
                 return convertToResponse(date, savedForecasts);
             }
 

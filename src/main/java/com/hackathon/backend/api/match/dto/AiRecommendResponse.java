@@ -20,6 +20,14 @@ public class AiRecommendResponse {
     @JsonProperty("student_id")
     private String studentId;
 
+    @Schema(description = "이름", example = "나의찬")
+    @JsonProperty("name")
+    private String name;
+
+    @Schema(description = "학년", example = "4")
+    @JsonProperty("grade")
+    private String grade;
+
     @Schema(description = "전공", example = "국방시스템공학과")
     @JsonProperty("major")
     private String major;

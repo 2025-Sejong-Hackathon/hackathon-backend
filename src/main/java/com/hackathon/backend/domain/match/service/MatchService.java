@@ -77,12 +77,55 @@ public class MatchService {
             List<AiRecommendResponse> recommendations = response.getBody();
             log.info("AI 서버 응답: count={}", recommendations != null ? recommendations.size() : 0);
 
+            // 각 추천 결과에 이름과 학년 추가
+            if (recommendations != null) {
+                recommendations = enrichRecommendations(recommendations);
+            }
+
             return recommendations;
 
         } catch (Exception e) {
             log.error("AI 서버 호출 실패", e);
             throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "추천 시스템 오류가 발생했습니다: " + e.getMessage());
         }
+    }
+
+    /**
+     * 추천 결과에 이름과 학년 정보 추가
+     */
+    private List<AiRecommendResponse> enrichRecommendations(List<AiRecommendResponse> recommendations) {
+        return recommendations.stream()
+                .map(recommendation -> {
+                    try {
+                        // 학번으로 회원 정보 조회
+                        Member member = memberRepository.findByStudentId(recommendation.getStudentId())
+                                .orElse(null);
+
+                        if (member != null) {
+                            // 이름과 학년 추가
+                            return AiRecommendResponse.builder()
+                                    .studentId(recommendation.getStudentId())
+                                    .name(member.getName())  // DB에서 조회한 이름
+                                    .grade(member.getGrade())  // DB에서 조회한 학년
+                                    .major(recommendation.getMajor())
+                                    .matchRate(recommendation.getMatchRate())
+                                    .isSmoker(recommendation.getIsSmoker())
+                                    .isDrinker(recommendation.getIsDrinker())
+                                    .sensitiveHeat(recommendation.getSensitiveHeat())
+                                    .sensitiveCold(recommendation.getSensitiveCold())
+                                    .matchItems(recommendation.getMatchItems())
+                                    .mismatchItems(recommendation.getMismatchItems())
+                                    .build();
+                        } else {
+                            log.warn("학번으로 회원을 찾을 수 없음: {}", recommendation.getStudentId());
+                            return recommendation;
+                        }
+                    } catch (Exception e) {
+                        log.error("추천 결과 enrichment 실패: studentId={}", recommendation.getStudentId(), e);
+                        return recommendation;
+                    }
+                })
+                .toList();
     }
 
     /**
