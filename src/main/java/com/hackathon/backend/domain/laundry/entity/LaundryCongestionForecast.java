@@ -7,20 +7,21 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "laundry_congestion_forecast",
-       uniqueConstraints = @UniqueConstraint(columnNames = {"week", "hour", "gender_zone"}))
+       uniqueConstraints = @UniqueConstraint(columnNames = {"forecast_date", "hour", "gender_zone"}))
 public class LaundryCongestionForecast extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private DayOfWeek week;
+    @Column(nullable = false)
+    private LocalDate forecastDate;
 
     @Column(nullable = false)
     private Integer hour;
@@ -32,18 +33,32 @@ public class LaundryCongestionForecast extends BaseEntity {
     @Column(nullable = false)
     private Integer congestion;
 
+    @Column(length = 200)
+    private String peakMessage;
+
+    @Column(length = 200)
+    private String recommendMessage;
+
     @Builder
-    public LaundryCongestionForecast(DayOfWeek week, Integer hour, GenderZone genderZone, Integer congestion) {
-        this.week = week;
+    public LaundryCongestionForecast(LocalDate forecastDate, Integer hour, GenderZone genderZone,
+                                     Integer congestion, String peakMessage, String recommendMessage) {
+        this.forecastDate = forecastDate;
         this.hour = hour;
         this.genderZone = genderZone;
         this.congestion = congestion;
+        this.peakMessage = peakMessage;
+        this.recommendMessage = recommendMessage;
     }
 
     public void updateCongestion(Integer congestion) {
         if (congestion >= 0 && congestion <= 10) {
             this.congestion = congestion;
         }
+    }
+
+    public void updateMessages(String peakMessage, String recommendMessage) {
+        this.peakMessage = peakMessage;
+        this.recommendMessage = recommendMessage;
     }
 
     public static boolean isValidHour(Integer hour) {
