@@ -10,6 +10,9 @@ spring:
         properties:
             hibernate:
                 default_batch_fetch_size: 100
+    sql:
+        init:
+            mode: never
 
 springdoc:
     api-docs:

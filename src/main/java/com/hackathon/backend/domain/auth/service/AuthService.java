@@ -60,7 +60,7 @@ public class AuthService {
                     .name(member.getName())
                     .major(member.getMajor())
                     .grade(member.getGrade())
-                    .completedSemesters(member.getCompletedSemesters())
+                    .completedSemesters(member.getCompletedSemester())
                     .status(member.getStatus().name())
                     .isNewMember(isNewMember)
                     .accessToken(accessToken)

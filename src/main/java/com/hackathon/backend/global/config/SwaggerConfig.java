@@ -4,6 +4,7 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +18,8 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI openAPI() {
         // JWT 보안 스키마 정의
+        String securitySchemeName = "Bearer Authentication";
+
         SecurityScheme securityScheme = new SecurityScheme()
                 .type(SecurityScheme.Type.HTTP)
                 .scheme("bearer")
@@ -24,6 +27,10 @@ public class SwaggerConfig {
                 .in(SecurityScheme.In.HEADER)
                 .name("Authorization")
                 .description("JWT 토큰을 입력하세요. (Bearer 접두사 제외)");
+
+        // 전역 보안 요구사항 설정 - 모든 API에 자동 적용
+        SecurityRequirement securityRequirement = new SecurityRequirement()
+                .addList(securitySchemeName);
 
         return new OpenAPI()
                 .info(new Info()
@@ -47,7 +54,8 @@ public class SwaggerConfig {
                         new Server().url("https://43.203.41.246/hack").description("프로덕션 서버")
                 ))
                 .components(new Components()
-                        .addSecuritySchemes("Bearer Authentication", securityScheme));
+                        .addSecuritySchemes(securitySchemeName, securityScheme))
+                .addSecurityItem(securityRequirement); // 전역 보안 적용
     }
 }
 
