@@ -40,5 +40,11 @@ public class MemberUpdateRequest {
 
     @Schema(description = "더위 민감 여부", example = "false")
     private Boolean isHeatSensitive;
+
+    @Schema(description = "룸메이트 흡연 선호", example = "false")
+    private Boolean roommateSmokingPref;
+
+    @Schema(description = "룸메이트 음주 선호", example = "true")
+    private Boolean roommateDrinkingPref;
 }
 

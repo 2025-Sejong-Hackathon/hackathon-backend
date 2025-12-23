@@ -5,7 +5,9 @@ import com.hackathon.backend.api.match.dto.AiRecommendResponse;
 import com.hackathon.backend.domain.gikbti.entity.UserGikbtiAnswer;
 import com.hackathon.backend.domain.gikbti.repository.UserGikbtiAnswerRepository;
 import com.hackathon.backend.domain.member.entity.Member;
+import com.hackathon.backend.domain.member.entity.UserPreferences;
 import com.hackathon.backend.domain.member.repository.MemberRepository;
+import com.hackathon.backend.domain.member.repository.UserPreferencesRepository;
 import com.hackathon.backend.global.exception.BusinessException;
 import com.hackathon.backend.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,7 @@ public class MatchService {
     private final RestTemplate restTemplate;
     private final MemberRepository memberRepository;
     private final UserGikbtiAnswerRepository gikbtiAnswerRepository;
+    private final UserPreferencesRepository userPreferencesRepository;
 
     @Value("${ai.server.url:http://43.203.41.246:8002}")
     private String aiServerUrl;
@@ -91,6 +94,11 @@ public class MatchService {
                 ? Period.between(member.getBirthDate(), LocalDate.now()).getYears()
                 : null;
 
+        // UserPreferences 조회 (룸메이트 선호도 - 별도 테이블)
+        UserPreferences preferences = userPreferencesRepository.findByMember(member).orElse(null);
+        Boolean wantsSmoker = preferences != null ? preferences.getRoommateSmokingPref() : null;
+        Boolean wantsDrinker = preferences != null ? preferences.getRoommateDrinkingPref() : null;
+
         // GIKBTI 응답을 Map으로 변환
         Map<Long, Integer> answerMap = new HashMap<>();
         for (UserGikbtiAnswer answer : answers) {
@@ -105,9 +113,9 @@ public class MatchService {
                 .gender(member.getGender() != null ? member.getGender().name() : null)
                 .major(member.getMajor())
                 .isSmoker(member.getIsSmoker())
-                .wantsSmoker(member.getIsSmoker()) // 동일하게 설정 (필요시 별도 필드 추가)
+                .wantsSmoker(wantsSmoker != null ? wantsSmoker : false) // UserPreferences에서 조회
                 .isDrinker(member.getIsDrinker())
-                .wantsDrinker(member.getIsDrinker()) // 동일하게 설정
+                .wantsDrinker(wantsDrinker != null ? wantsDrinker : false) // UserPreferences에서 조회
                 .sensitiveHeat(member.getHeatSensitive())
                 .sensitiveCold(member.getColdSensitive())
                 // GIKBTI 응답 매핑 (질문 ID 1-16)
@@ -130,4 +138,3 @@ public class MatchService {
                 .build();
     }
 }
-

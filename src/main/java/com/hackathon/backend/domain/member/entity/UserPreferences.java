@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "user_preferences")
 public class UserPreferences extends BaseEntity {
 
     @Id
@@ -20,17 +21,17 @@ public class UserPreferences extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false, unique = true)
     private Member member;
 
-    @Column(nullable = false)
+    @Column(name = "roommate_smoking_pref")
     private Boolean roommateSmokingPref;
 
-    @Column(nullable = false)
+    @Column(name = "roommate_drinking_pref")
     private Boolean roommateDrinkingPref;
 
     @Builder
     public UserPreferences(Member member, Boolean roommateSmokingPref, Boolean roommateDrinkingPref) {
         this.member = member;
-        this.roommateSmokingPref = roommateSmokingPref != null ? roommateSmokingPref : false;
-        this.roommateDrinkingPref = roommateDrinkingPref != null ? roommateDrinkingPref : false;
+        this.roommateSmokingPref = roommateSmokingPref;
+        this.roommateDrinkingPref = roommateDrinkingPref;
     }
 
     public void updatePreferences(Boolean roommateSmokingPref, Boolean roommateDrinkingPref) {
