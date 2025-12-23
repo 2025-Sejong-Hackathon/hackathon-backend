@@ -27,6 +27,14 @@ public class MemberOnboardingRequest {
     @NotNull(message = "흡연 여부는 필수입니다.")
     private Boolean isSmoker;
 
+    @Schema(description = "룸메이트 흡연 선호 여부", example = "true")
+    @NotNull(message = "룸메이트 흡연 선호 여부는 필수입니다.")
+    private Boolean roommateSmokingPref;
+
+    @Schema(description = "룸메이트 음주 선호 여부", example = "false")
+    @NotNull(message = "룸메이트 음주 선호 여부는 필수입니다.")
+    private Boolean roommateDrinkingPref;
+
     @Schema(description = "음주 여부", example = "false")
     @NotNull(message = "음주 여부는 필수입니다.")
     private Boolean isDrinker;

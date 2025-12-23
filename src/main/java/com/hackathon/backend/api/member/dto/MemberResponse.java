@@ -2,6 +2,7 @@ package com.hackathon.backend.api.member.dto;
 
 import com.hackathon.backend.domain.member.entity.Gender;
 import com.hackathon.backend.domain.member.entity.Member;
+import com.hackathon.backend.domain.member.entity.UserPreferences;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -55,6 +56,12 @@ public class MemberResponse {
     @Schema(description = "더위 민감 여부")
     private Boolean isHeatSensitive;
 
+    @Schema(description = "룸메이트 흡연 선호")
+    private Boolean roommateSmokingPref;
+
+    @Schema(description = "룸메이트 음주 선호")
+    private Boolean roommateDrinkingPref;
+
     @Schema(description = "GIKBTI 타입")
     private String gikbti;
 
@@ -65,6 +72,10 @@ public class MemberResponse {
     private LocalDateTime updatedAt;
 
     public static MemberResponse from(Member member) {
+        return from(member, null);
+    }
+
+    public static MemberResponse from(Member member, UserPreferences preferences) {
         return MemberResponse.builder()
                 .id(member.getId())
                 .studentId(member.getStudentId())
@@ -79,6 +90,8 @@ public class MemberResponse {
                 .isDrinker(member.getIsDrinker())
                 .isColdSensitive(member.getColdSensitive())
                 .isHeatSensitive(member.getHeatSensitive())
+                .roommateSmokingPref(preferences != null ? preferences.getRoommateSmokingPref() : null)
+                .roommateDrinkingPref(preferences != null ? preferences.getRoommateDrinkingPref() : null)
                 .gikbti(member.getGikbti())
                 .createdAt(member.getCreatedAt())
                 .updatedAt(member.getUpdatedAt())

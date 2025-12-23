@@ -54,7 +54,9 @@ public class MemberController {
                 request.getGender(),
                 request.getBirthDate(),
                 request.getIsSmoker(),
+                request.getRoommateSmokingPref(),
                 request.getIsDrinker(),
+                request.getRoommateDrinkingPref(),
                 request.getIsColdSensitive(),
                 request.getIsHeatSensitive()
         );
@@ -83,7 +85,9 @@ public class MemberController {
                 request.getIsSmoker(),
                 request.getIsDrinker(),
                 request.getIsColdSensitive(),
-                request.getIsHeatSensitive()
+                request.getIsHeatSensitive(),
+                request.getRoommateSmokingPref(),
+                request.getRoommateDrinkingPref()
         );
 
         MemberResponse response = MemberResponse.from(updatedMember);
