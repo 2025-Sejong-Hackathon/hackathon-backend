@@ -26,7 +26,7 @@ public interface LaundryCongestionForecastRepository extends JpaRepository<Laund
     /**
      * 특정 날짜의 모든 데이터 삭제
      */
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("DELETE FROM LaundryCongestionForecast lcf WHERE lcf.forecastDate = :forecastDate AND lcf.genderZone = :genderZone")
     void deleteByForecastDateAndGenderZone(@Param("forecastDate") LocalDate forecastDate, @Param("genderZone") GenderZone genderZone);
 }
