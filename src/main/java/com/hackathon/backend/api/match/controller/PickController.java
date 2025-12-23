@@ -1,3 +1,4 @@
+
 package com.hackathon.backend.api.match.controller;
 
 import com.hackathon.backend.api.match.dto.MatchPairResponse;
@@ -107,4 +108,3 @@ public class PickController {
         return ResponseEntity.ok(ApiResponse.success(responses));
     }
 }
-

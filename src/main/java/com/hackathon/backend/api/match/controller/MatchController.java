@@ -1,7 +1,9 @@
 package com.hackathon.backend.api.match.controller;
 
 import com.hackathon.backend.api.match.dto.AiRecommendResponse;
+import com.hackathon.backend.api.match.dto.MatchPairResponse;
 import com.hackathon.backend.domain.match.service.MatchService;
+import com.hackathon.backend.domain.match.service.PickService;
 import com.hackathon.backend.global.response.ApiResponse;
 import com.hackathon.backend.global.security.MemberDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,6 +27,7 @@ import java.util.List;
 public class MatchController {
 
     private final MatchService matchService;
+    private final PickService pickService;
 
     @Operation(
             summary = "룸메이트 추천 조회",
@@ -46,6 +49,25 @@ public class MatchController {
         return ResponseEntity.ok(ApiResponse.success(
                 String.format("총 %d명의 추천 결과를 찾았습니다.", recommendations.size()),
                 recommendations));
+    }
+
+    @Operation(
+            summary = "내 매칭 페어 목록 조회",
+            description = """
+                    서로 Pick하여 생성된 MatchPair 목록을 조회합니다.
+                    
+                    - MatchPair가 생성되면 1:1 채팅방이 자동으로 만들어집니다.
+                    - 채팅방에서 매칭 요청을 보낼 수 있습니다.
+                    """
+    )
+    @GetMapping("/pairs")
+    public ResponseEntity<ApiResponse<List<MatchPairResponse>>> getMyMatchPairs(
+            @Parameter(hidden = true) @AuthenticationPrincipal MemberDetails memberDetails) {
+        log.info("매칭 페어 목록 조회: memberId={}", memberDetails.getMemberId());
+
+        List<MatchPairResponse> matchPairs = pickService.getMyMatchPairs(memberDetails.getMemberId());
+
+        return ResponseEntity.ok(ApiResponse.success(matchPairs));
     }
 }
 

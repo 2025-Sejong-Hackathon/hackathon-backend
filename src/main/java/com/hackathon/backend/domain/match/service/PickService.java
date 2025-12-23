@@ -1,6 +1,8 @@
+
 package com.hackathon.backend.domain.match.service;
 
 import com.hackathon.backend.api.match.dto.*;
+import com.hackathon.backend.domain.chat.service.ChatService;
 import com.hackathon.backend.domain.match.entity.*;
 import com.hackathon.backend.domain.match.repository.*;
 import com.hackathon.backend.domain.member.entity.Member;
@@ -26,6 +28,7 @@ public class PickService {
     private final MatchRequestRepository matchRequestRepository;
     private final RoommateMatchRepository roommateMatchRepository;
     private final MemberRepository memberRepository;
+    private final ChatService chatService;
 
     /**
      * 회원 Pick
@@ -163,6 +166,15 @@ public class PickService {
 
         log.info("MatchPair 생성 완료: id={}, member1={}, member2={}",
                 matchPair.getId(), member1.getId(), member2.getId());
+
+        // 🎉 채팅방 자동 생성
+        try {
+            chatService.createChatRoom(matchPair);
+            log.info("채팅방 자동 생성 완료: matchPairId={}", matchPair.getId());
+        } catch (Exception e) {
+            log.error("채팅방 생성 실패: matchPairId={}", matchPair.getId(), e);
+            // 채팅방 생성 실패해도 MatchPair는 유지
+        }
     }
 
     /**
@@ -188,4 +200,3 @@ public class PickService {
                 .collect(Collectors.toList());
     }
 }
-
