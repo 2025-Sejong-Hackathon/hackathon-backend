@@ -129,6 +129,120 @@ public class GikbtiService {
     }
 
     /**
+     * 전체 사용자 GIKBTI 재계산
+     * 기존 UserGikbtiAnswer 데이터를 기반으로 모든 회원의 GIKBTI 타입을 재계산
+     */
+    @Transactional
+    public Map<String, Integer> recalculateAllGikbti() {
+        log.info("전체 사용자 GIKBTI 재계산 시작");
+        long startTime = System.currentTimeMillis();
+
+        int successCount = 0;
+        int failCount = 0;
+
+        // GIKBTI 응답이 있는 모든 회원 조회
+        List<Member> membersWithAnswers = answerRepository.findAll().stream()
+                .map(UserGikbtiAnswer::getMember)
+                .distinct()
+                .collect(Collectors.toList());
+
+        log.info("GIKBTI 응답이 있는 회원 수: {}", membersWithAnswers.size());
+
+        for (Member member : membersWithAnswers) {
+            try {
+                // 해당 회원의 모든 GIKBTI 응답 조회
+                List<UserGikbtiAnswer> memberAnswers = answerRepository.findByMemberId(member.getId());
+
+                // 16개 응답이 없으면 건너뛰기
+                if (memberAnswers.size() != 16) {
+                    log.warn("회원 {}의 GIKBTI 응답이 불완전합니다. (응답 수: {})", member.getId(), memberAnswers.size());
+                    failCount++;
+                    continue;
+                }
+
+                // 카테고리별 점수 계산
+                Map<GikbtiCategory, Integer> categoryScores = new HashMap<>();
+                for (UserGikbtiAnswer answer : memberAnswers) {
+                    GikbtiQuestion question = answer.getGikbtiQuestion();
+                    GikbtiOption option = answer.getGikbtiOption();
+
+                    // 가중치 적용하여 점수 계산
+                    if (option.getIsTrue()) {
+                        int weight = question.getWeight() != null ? question.getWeight() : 1;
+                        categoryScores.merge(question.getCategory(), weight, Integer::sum);
+                    }
+                }
+
+                // GIKBTI 타입 계산
+                String gikbtiType = calculateGikbtiType(categoryScores);
+
+                // Member에 GIKBTI 타입 저장
+                member.updateGikbti(gikbtiType);
+
+                successCount++;
+                log.debug("회원 {} GIKBTI 재계산 완료: {}", member.getId(), gikbtiType);
+
+            } catch (Exception e) {
+                log.error("회원 {} GIKBTI 재계산 실패", member.getId(), e);
+                failCount++;
+            }
+        }
+
+        long endTime = System.currentTimeMillis();
+        long processingTime = endTime - startTime;
+
+        log.info("GIKBTI 재계산 완료 - 총: {}, 성공: {}, 실패: {}, 처리시간: {}ms",
+                membersWithAnswers.size(), successCount, failCount, processingTime);
+
+        Map<String, Integer> result = new HashMap<>();
+        result.put("total", membersWithAnswers.size());
+        result.put("success", successCount);
+        result.put("fail", failCount);
+        result.put("processingTime", (int) processingTime);
+
+        return result;
+    }
+
+    /**
+     * 특정 회원의 GIKBTI 재계산
+     */
+    @Transactional
+    public String recalculateMemberGikbti(Long memberId) {
+        log.info("회원 {} GIKBTI 재계산", memberId);
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+
+        List<UserGikbtiAnswer> memberAnswers = answerRepository.findByMemberId(memberId);
+
+        if (memberAnswers.size() != 16) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "GIKBTI 응답이 불완전합니다. (응답 수: " + memberAnswers.size() + ")");
+        }
+
+        // 카테고리별 점수 계산
+        Map<GikbtiCategory, Integer> categoryScores = new HashMap<>();
+        for (UserGikbtiAnswer answer : memberAnswers) {
+            GikbtiQuestion question = answer.getGikbtiQuestion();
+            GikbtiOption option = answer.getGikbtiOption();
+
+            if (option.getIsTrue()) {
+                int weight = question.getWeight() != null ? question.getWeight() : 1;
+                categoryScores.merge(question.getCategory(), weight, Integer::sum);
+            }
+        }
+
+        // GIKBTI 타입 계산
+        String gikbtiType = calculateGikbtiType(categoryScores);
+
+        // Member에 GIKBTI 타입 저장
+        member.updateGikbti(gikbtiType);
+
+        log.info("회원 {} GIKBTI 재계산 완료: {}", memberId, gikbtiType);
+
+        return gikbtiType;
+    }
+
+    /**
      * 카테고리 정렬 순서 정의
      * 1. MORNING_EVENING (아침형/저녁형)
      * 2. CLEAN_DIRTY (청결형/더러운형)
